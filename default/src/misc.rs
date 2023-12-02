@@ -69,17 +69,18 @@ pub fn load(year: u32, day: u32) -> io::Result<String> {
 
 /// Load the input for the given year and day.
 pub fn load_raw(year: u32, day: u32) -> io::Result<String> {
-    let file = format!("input/{year}/{:02}.txt", day);
+    let file = format!("input/{year}/{day:02}.txt");
     fs::read_to_string(file)
 }
 
+#[must_use]
 pub fn human_time(time: u128) -> String {
     const TIME_UNITS: &[&str] = &["ns", "μs", "ms", "s"];
 
     let mut time = time;
     for i in TIME_UNITS {
         if time < 1000 {
-            return format!("{}{}", time, i);
+            return format!("{time}{i}");
         }
         time /= 1000;
     }

@@ -41,12 +41,17 @@ pub struct Day02;
 // Determine which games would have been possible if the bag had been loaded with only 12 red
 // cubes, 13 green cubes, and 14 blue cubes. What is the sum of the IDs of those games?
 
-#[derive(Debug)]
 struct Round {
-    red: Option<u32>,
-    blue: Option<u32>,
-    green: Option<u32>,
+    red: Option<u64>,
+    blue: Option<u64>,
+    green: Option<u64>,
 }
+
+const RULES: Round = Round {
+    red: Some(12),
+    blue: Some(14),
+    green: Some(13),
+};
 
 impl Round {
     fn merge_max(&self, other: &Round) -> Round {
@@ -67,54 +72,49 @@ impl Round {
     }
 }
 
-const RULES: Round = Round {
-    red: Some(12),
-    blue: Some(14),
-    green: Some(13),
-};
-
-#[derive(Debug)]
 struct Game {
     rounds: Vec<Round>,
-    game_no: u32,
+    game_no: u64,
+}
+
+fn parse_hand(hand: &str) -> (&str, &str) {
+    hand.split_once(' ').expect("Malformed line!")
+}
+
+fn parse_game_str(game_str: &str) -> Round {
+    let mut round = Round {
+        red: None,
+        blue: None,
+        green: None,
+    };
+
+    let hands: Vec<&str> = game_str.split(", ").collect();
+    for hand in hands {
+        let (count, color) = parse_hand(hand);
+        if let Ok(count) = count.parse::<u64>() {
+            match color {
+                "red" => round.red = Some(count),
+                "green" => round.green = Some(count),
+                "blue" => round.blue = Some(count),
+                _ => {}
+            }
+        }
+    }
+    round
 }
 
 fn parse_line_to_game(game_line: &str) -> Game {
     let (game_no, games) = game_line.split_once(": ").expect("Malformed line!");
-    let games: Vec<&str> = games.split("; ").collect();
-    let game_no: u32 = game_no
-        .split(" ")
+    let game_no = game_no
+        .split(' ')
         .nth(1)
         .unwrap()
         .parse()
         .expect("Malformed line!");
-    let mut game = Game {
-        rounds: vec![],
-        game_no,
-    };
-    for game_str in &games {
-        let mut round = Round {
-            red: None,
-            blue: None,
-            green: None,
-        };
-        let game_str: Vec<&str> = game_str.split(", ").collect();
-        for hand in game_str {
-            let (count, color) = hand.split_once(" ").expect("Malformed line!");
-            let count = count.parse::<u32>();
-            match count {
-                Ok(count) => match color {
-                    "red" => round.red = Some(count),
-                    "green" => round.green = Some(count),
-                    "blue" => round.blue = Some(count),
-                    _ => {}
-                },
-                _ => {}
-            }
-        }
-        game.rounds.push(round);
-    }
-    game
+
+    let rounds: Vec<Round> = games.split("; ").map(parse_game_str).collect();
+
+    Game { rounds, game_no }
 }
 
 fn matches_rules(game: &Game) -> bool {
@@ -126,7 +126,7 @@ fn matches_rules(game: &Game) -> bool {
     true
 }
 
-fn get_round_square(max: &Round) -> u32 {
+fn get_round_square(max: &Round) -> u64 {
     max.blue.unwrap() * max.green.unwrap() * max.red.unwrap()
 }
 
@@ -136,14 +136,14 @@ impl Solution for Day02 {
     }
 
     fn p1(&self, input: &str) -> Answer {
-        let mut sum = 0;
-        for line in input.lines() {
-            let game = parse_line_to_game(line);
-            if matches_rules(&game) {
-                sum += game.game_no;
-            }
-        }
-        Answer::from(sum)
+        let sum: u64 = input
+            .lines()
+            .map(parse_line_to_game)
+            .filter(|game| matches_rules(game))
+            .map(|game| game.game_no)
+            .sum();
+
+        Answer::Number(sum)
     }
 
     fn p2(&self, input: &str) -> Answer {
@@ -161,7 +161,7 @@ impl Solution for Day02 {
             );
             sum += get_round_square(&max_round);
         }
-        Answer::from(sum)
+        Answer::Number(sum)
     }
 }
 

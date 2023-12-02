@@ -7,22 +7,31 @@ fn extract_numeric_chars(line: &str) -> Vec<char> {
     line.chars().filter(|&c| c.is_numeric()).collect()
 }
 
+const NUMBERS_WRITTEN: [(&str, u32); 9] = [
+    ("one", 1),
+    ("two", 2),
+    ("three", 3),
+    ("four", 4),
+    ("five", 5),
+    ("six", 6),
+    ("seven", 7),
+    ("eight", 8),
+    ("nine", 9),
+];
+
 impl Solution for Day01 {
     fn name(&self) -> &'static str {
         "Trebuchet?!"
     }
 
     fn p1(&self, input: &str) -> Answer {
-        let num_vecs: Vec<Vec<char>> = input
-            .lines()
-            .map(|line| extract_numeric_chars(line))
-            .collect();
+        let num_vecs: Vec<Vec<char>> = input.lines().map(extract_numeric_chars).collect();
 
-        let sum: i32 = num_vecs
+        let sum: u64 = num_vecs
             .iter()
             .map(|char_vec| {
                 if let (Some(&char1), Some(&char2)) = (char_vec.first(), char_vec.last()) {
-                    let number: i32 = format!("{}{}", char1, char2)
+                    let number: u64 = format!("{char1}{char2}")
                         .parse()
                         .expect("Result is non-numeric!");
                     number
@@ -35,8 +44,7 @@ impl Solution for Day01 {
     }
 
     fn p2(&self, input: &str) -> Answer {
-        // println!("{input}");
-        return Answer::Unimplemented;
+        Answer::String("Unfinished".parse().unwrap())
     }
 }
 

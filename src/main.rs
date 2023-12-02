@@ -18,6 +18,7 @@ fn main() {
             for day in 1..=25 {
                 if let Some(solution) = solutions.get(day - 1) {
                     let input = default::load(year, day as u32).expect("No input found!");
+
                     println!(
                         "{day:02}: {:20} {:<20} {:<20}",
                         solution.name(),
